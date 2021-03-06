@@ -67,7 +67,8 @@ public class Board {
                 } else {
                     System.out.print(emptyField); //empty field = null
                 }
-            }System.out.println();
+            }
+            System.out.println();
         }
     }
 

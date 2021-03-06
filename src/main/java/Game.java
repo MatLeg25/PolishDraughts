@@ -1,15 +1,26 @@
 import java.util.Scanner;
-
+//dorobic komunikaty o bledach na czerwono i oczekiwanie na enter po komunikayach
 public class Game {
 
-    private static String Player1symbol = "\033[0;31m O \033[0m"; //red
-    private static String Player2symbol = "\033[0;33m O \033[0m"; // yellow
-    private static String emptyField = "\033[0;30m . \033[0m | ";
+    private static String Player1symbol = "\033[0;32m \u25CF \033[0m"; //green //u25CF small
+    private static String Player2symbol = "\033[0;34m \u25CF \033[0m"; // blue //u2b24 big
+    private static String emptyField = "\033[0;30m \u25CF \033[0m | ";
     private static String[] symbols = {Player1symbol,Player2symbol,emptyField};
-
+    private static String Player1symbolRun =  "\033[0;33m \u25CF \033[0m"; //green
+    private static String Player2symbolRun =  "\033[0;35m \u25CF \033[0m"; // blue
     private static int gameBoardSize;
 
     public static void main(String args[]) {
+
+        boolean play = true;
+        while (play) {
+            game();
+            play = playAgain();
+        }
+        System.out.println("\nGoodbye!");
+    }
+
+    public static void game() {
         boolean game = true;
         int counter=0;
         String currentPlayerSymbol;
@@ -21,13 +32,13 @@ public class Game {
 
         while (game) {
 
-            PawnCount = countPawns(gameBoardSize);
-            System.out.println("\nPAWN COUNT: Player1="+PawnCount[0]+" ,Player2="+PawnCount[1]);
-
             if (counter%2==0) {currentPlayerSymbol = Player1symbol;Player="Player1"; } else {currentPlayerSymbol = Player2symbol;Player="Player2";}
-            System.out.println("\nCURRENT PLAYER: "+Player);
+            System.out.println("\n\n"+"\033[1;95m"+"CURRENT PLAYER: "+Player+"\033[0m");
 
             Board.displayBoard();
+
+            PawnCount = countPawns(gameBoardSize);
+            System.out.println("\033[1;90m"+"PAWN COUNT: Player1="+PawnCount[0]+" ,Player2="+PawnCount[1]+"\033[0m");
 
             int[] getOldPosition = getPosition("Select token to move: ");
             int oldX = getOldPosition[0];
@@ -54,13 +65,13 @@ public class Game {
                 pawnElminated(changePositions, currentPlayerSymbol);
                 clearHighlightPawn(newX,newY,Player);
             } else {
-                System.out.println("Wrong move, try again! \n");
+                //printError("Wrong move, try again!");
                 clearHighlightPawn(oldX,oldY,Player);
                 continue;
             }
             if (checkWinners(countPawns(Game.gameBoardSize))) {
                 game = false;
-                };
+            };
             //System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
             counter++;
         }
@@ -94,6 +105,7 @@ public class Game {
     }
 
     public static int[] getPosition(String info) {
+        System.out.println();
         System.out.println(info);
         Scanner userPosition = new Scanner(System.in);
         System.out.print("Type row(X): ");
@@ -133,16 +145,16 @@ public class Game {
         }
 
         if ((Math.abs(newX-oldX) > 2 ) ||  (Math.abs(newY-oldY) > 2)) {
-            System.out.print("\nYou can not move there!\n");
+            printError("\nYou cannot move there!\n");
             return false;
         }
 
-        if ((Math.abs(newX-oldX) == 2 ) ||  (Math.abs(newY-oldY) == 2)) {
+        if ((Math.abs(newX-oldX) == 2 ) &&  (Math.abs(newY-oldY) == 2)) {
             if (Board.fields[oPpositionX][oPpositionY] == null) {
-                System.out.print("\nYou can not move about 2field if you do not attack enemy!\n");
+                printError("\nYou can not move about 2field if you do not attack enemy!\n");
                 return false;
             } else if (Board.fields[oPpositionX][oPpositionY].playerSymbol == GamerSymbol) {
-                System.out.print("\nYou can not move above your pawn!\n");
+                printError("\nYou can not move above your pawn!\n");
                 return false;
             }
             return true;
@@ -153,7 +165,7 @@ public class Game {
             if ((Math.abs(newX-oldX) == 1 ) &&  (Math.abs(newY-oldY) == 1)) {
                 return true;
             } else {
-                System.out.println("\nYou can move only in the diagonals direction");
+                printError("\nYou can move only in the diagonals direction");
                 return false;}
         } else {
             return false;
@@ -162,11 +174,11 @@ public class Game {
 
     public static boolean checkSelectedPawn(int x, int y, String GamerSymbol) {
         if (Board.fields[x][y] == null) {
-            System.out.println("\nIncorrect coordinates! Grab correct pawn!");
+            printError("\nIncorrect coordinates! Grab correct pawn!");
             return false;
         }
         if (Board.fields[x][y].playerSymbol != GamerSymbol) {
-            System.out.println("Select your pawn!");
+            printError("Select your pawn!");
             return false;
         }
         return true;
@@ -195,11 +207,11 @@ public class Game {
         int cP2 = data[1];
 
         if (cP2 == 0) {
-            System.out.println("\n\nGame over. The winner is Player1");
+            System.out.println("\n\n"+"\033[32;103m"+"Game over. The winner is Player1"+"\033[0m"+"\n\n");
             return true;
         }
         if (cP1 == 0) {
-            System.out.println("\n\nGame over. The winner is Player2");
+            System.out.println("\n\n"+"\033[32;103m"+"Game over. The winner is Player2"+"\033[0m"+"\n\n");
             return true;
         }
         return false;
@@ -217,7 +229,7 @@ public class Game {
         //double xCheck = Math.sqrt((newX-oldX)*(newX-oldX));
         double xCheck = Math.abs(newX-oldX);
         if (xCheck == 2) {
-            System.out.println("ELIMINATED: "+oPpositionX + "|" + oPpositionY);
+            //System.out.println("ELIMINATED: "+oPpositionX + "|" + oPpositionY);
             if (Board.fields[oPpositionX][oPpositionY].playerSymbol != gamerSymbol) {
                 Board.fields[oPpositionX][oPpositionY] = null;
                 return true;
@@ -230,9 +242,9 @@ public class Game {
     public static void highlightPawn(int X, int Y, String Gamer) {
 
         if (Gamer=="Player1") {
-            Board.fields[X][Y].playerSymbol = "\033[0;35m O \033[0m";
+            Board.fields[X][Y].playerSymbol = Game.Player1symbolRun;
         } else {
-            Board.fields[X][Y].playerSymbol = "\033[1;92m O \033[0m"; //green
+            Board.fields[X][Y].playerSymbol = Game.Player2symbolRun;
         }
     }
 
@@ -244,4 +256,23 @@ public class Game {
             Board.fields[X][Y].playerSymbol = Game.Player2symbol; //"\033[0;33m O \033[0m";
         }
     }
+
+    public static boolean playAgain() {
+        Scanner userAnsw = new Scanner(System.in);
+        System.out.print("Do you want play again ? Y or N \n");
+        String answ = userAnsw.nextLine();
+
+        if (answ.equalsIgnoreCase("Y")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static void printError(String message) {
+        System.out.println("\033[0;31m"+message+"\033[0m");
+        Scanner takeEnter = new Scanner(System.in);
+        String enter = takeEnter.nextLine();
+    }
+
 }
